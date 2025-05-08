@@ -1,22 +1,22 @@
 package com.sumin.vknewsclient.ui.theme
 
-import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sumin.vknewsclient.MainViewModel
-import com.sumin.vknewsclient.domain.FeedPost
-import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     Scaffold(
@@ -49,14 +49,51 @@ fun MainScreen(viewModel: MainViewModel) {
             }
         }
     ) {
-        val feedPost = viewModel.feedPost.observeAsState(FeedPost())
-        PostCard(
-            modifier = Modifier.padding(8.dp),
-            feedPost = feedPost.value,
-            onLikeClickListener = viewModel::updateCount,
-            onShareClickListener = viewModel::updateCount,
-            onViewsClickListener = viewModel::updateCount,
-            onCommentClickListener = viewModel::updateCount
-        )
+        val feedPosts = viewModel.feedPosts.observeAsState(listOf())
+
+
+        LazyColumn(
+            modifier = Modifier.padding(it),
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                start = 8.dp,
+                end = 8.dp,
+                bottom = 72.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(
+                items = feedPosts.value,
+                key = { it.id }
+            ) { feedpost ->
+                val dismissState = rememberDismissState()
+                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                    viewModel.remove(feedpost)
+                }
+
+                SwipeToDismiss(
+                    modifier = Modifier.animateItemPlacement(),
+                    state = dismissState,
+                    background = {},
+                    directions = setOf(DismissDirection.EndToStart)
+                ) {
+                    PostCard(
+                        feedPost = feedpost,
+                        onLikeClickListener = { statisticitem ->
+                            viewModel.updateCount(feedpost, statisticitem)
+                        },
+                        onShareClickListener = { statisticitem ->
+                            viewModel.updateCount(feedpost, statisticitem)
+                        },
+                        onViewsClickListener = { statisticitem ->
+                            viewModel.updateCount(feedpost, statisticitem)
+                        },
+                        onCommentClickListener = { statisticitem ->
+                            viewModel.updateCount(feedpost, statisticitem)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
