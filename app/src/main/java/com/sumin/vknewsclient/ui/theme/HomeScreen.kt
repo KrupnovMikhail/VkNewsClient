@@ -15,6 +15,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sumin.vknewsclient.MainViewModel
+import com.sumin.vknewsclient.domain.PostComment
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -24,48 +25,58 @@ fun HomeScreen(
 ) {
     val feedPosts = viewModel.feedPosts.observeAsState(listOf())
 
-
-    LazyColumn(
-        modifier = Modifier.padding(paddingValues),
-        contentPadding = PaddingValues(
-            top = 16.dp,
-            start = 8.dp,
-            end = 8.dp,
-            bottom = 72.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(
-            items = feedPosts.value,
-            key = { it.id }
-        ) { feedpost ->
-            val dismissState = rememberDismissState()
-            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                viewModel.remove(feedpost)
-            }
-
-            SwipeToDismiss(
-                modifier = Modifier.animateItemPlacement(),
-                state = dismissState,
-                background = {},
-                directions = setOf(DismissDirection.EndToStart)
-            ) {
-                PostCard(
-                    feedPost = feedpost,
-                    onLikeClickListener = { statisticitem ->
-                        viewModel.updateCount(feedpost, statisticitem)
-                    },
-                    onShareClickListener = { statisticitem ->
-                        viewModel.updateCount(feedpost, statisticitem)
-                    },
-                    onViewsClickListener = { statisticitem ->
-                        viewModel.updateCount(feedpost, statisticitem)
-                    },
-                    onCommentClickListener = { statisticitem ->
-                        viewModel.updateCount(feedpost, statisticitem)
-                    }
+    if (feedPosts.value.isNotEmpty()) {
+        val comments = mutableListOf<PostComment>().apply {
+            repeat(20) {
+                add(
+                    PostComment(id = it)
                 )
             }
         }
+        CommentsScreen(feedPost = feedPosts.value.get(0), comments = comments)
     }
+
+//    LazyColumn(
+//        modifier = Modifier.padding(paddingValues),
+//        contentPadding = PaddingValues(
+//            top = 16.dp,
+//            start = 8.dp,
+//            end = 8.dp,
+//            bottom = 72.dp
+//        ),
+//        verticalArrangement = Arrangement.spacedBy(8.dp)
+//    ) {
+//        items(
+//            items = feedPosts.value,
+//            key = { it.id }
+//        ) { feedpost ->
+//            val dismissState = rememberDismissState()
+//            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+//                viewModel.remove(feedpost)
+//            }
+//
+//            SwipeToDismiss(
+//                modifier = Modifier.animateItemPlacement(),
+//                state = dismissState,
+//                background = {},
+//                directions = setOf(DismissDirection.EndToStart)
+//            ) {
+//                PostCard(
+//                    feedPost = feedpost,
+//                    onLikeClickListener = { statisticitem ->
+//                        viewModel.updateCount(feedpost, statisticitem)
+//                    },
+//                    onShareClickListener = { statisticitem ->
+//                        viewModel.updateCount(feedpost, statisticitem)
+//                    },
+//                    onViewsClickListener = { statisticitem ->
+//                        viewModel.updateCount(feedpost, statisticitem)
+//                    },
+//                    onCommentClickListener = { statisticitem ->
+//                        viewModel.updateCount(feedpost, statisticitem)
+//                    }
+//                )
+//            }
+//        }
+//    }
 }
