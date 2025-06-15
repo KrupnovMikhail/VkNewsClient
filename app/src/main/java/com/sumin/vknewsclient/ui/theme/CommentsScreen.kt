@@ -1,5 +1,6 @@
 package com.sumin.vknewsclient.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,16 +17,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sumin.vknewsclient.CommentsViewModel
+import com.sumin.vknewsclient.CommentsViewModelFactory
 import com.sumin.vknewsclient.domain.FeedPost
 import com.sumin.vknewsclient.domain.PostComment
 
 @Composable
 fun CommentsScreen(
     onBackPressed: () -> Unit,
+    feedPost: FeedPost,
 ) {
-    val viewModel: CommentsViewModel = viewModel()
+    val viewModel: CommentsViewModel = viewModel(
+        factory = CommentsViewModelFactory(feedPost)
+    )
     val screenState = viewModel.screenState.observeAsState(CommentsScreenState.Initial)
     val currentState = screenState.value
+
     if (currentState is CommentsScreenState.Comments) {
         Scaffold(
             topBar = {
